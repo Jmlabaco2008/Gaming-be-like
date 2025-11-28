@@ -1,13 +1,12 @@
 --// NameLess Project
 --// Credits: Mart Labaco
---// Version: v1.3
+--// Version: v1.3 (UI Fixed)
 
---// Load Rayfield UI
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
 Name = "NameLess - Auto Buyer v1.3",
-LoadingTitle = "NameLess Project",
+LoadingTitle = "NameLess",
 LoadingSubtitle = "By Mart Labaco",
 ConfigurationSaving = {
 Enabled = true,
@@ -21,8 +20,8 @@ KeySystem = false
 -- TABS
 --------------------------------------------------------
 
-local GearTab = Window:CreateTab("⚙️ Auto Gear Buyer")
-local SeedTab = Window:CreateTab("🌱 Auto Seed Buyer")
+local GearTab = Window:CreateTab("⚙️ Auto Gear")
+local SeedTab = Window:CreateTab("🌱 Auto Seeds")
 
 --------------------------------------------------------
 -- AUTO BUY GEAR
@@ -36,24 +35,43 @@ local gearList = {
 "Carrot Launcher"
 }
 
-local selectedGear = {}
+local selectedGear = {} -- holds selected gear
 
-GearTab:CreateSection("Gear Options")
+GearTab:CreateSection("Select Gear to Buy")
 
-local GearMulti = GearTab:CreateMultiDropdown({
-Name = "Select Gear to Auto Buy",
+GearTab:CreateDropdown({
+Name = "Choose Gear",
 Options = gearList,
-CurrentOption = {},
-MultipleOptions = true,
-Callback = function(Value)
-selectedGear = Value
+CurrentOption = "",
+Flag = "ChooseGear",
+Callback = function(option)
+if not table.find(selectedGear, option) then
+table.insert(selectedGear, option)
+Rayfield:Notify({
+Title = "Gear Added",
+Content = "Selected: "..option,
+Duration = 2
+})
+end
+end,
+})
+
+GearTab:CreateButton({
+Name = "Clear Selected Gear",
+Callback = function()
+selectedGear = {}
+Rayfield:Notify({
+Title = "Cleared",
+Content = "All selected gear removed.",
+Duration = 2
+})
 end,
 })
 
 GearTab:CreateToggle({
 Name = "Enable Auto Buy Gear",
 CurrentValue = false,
-Flag = "AutoBuyGearFlag",
+Flag = "AutoBuyGear",
 Callback = function(state)
 getgenv().AutoBuyGear = state
 
@@ -74,7 +92,7 @@ end,
 })
 
 --------------------------------------------------------
--- AUTO BUY SEEDS (NEW v1.3 FEATURE)
+-- AUTO BUY SEEDS
 --------------------------------------------------------
 
 local seedList = {
@@ -98,22 +116,41 @@ local seedList = {
 
 local selectedSeeds = {}
 
-SeedTab:CreateSection("Seed Options")
+SeedTab:CreateSection("Select Seeds to Buy")
 
-local SeedMulti = SeedTab:CreateMultiDropdown({
-Name = "Select Seeds to Auto Buy",
+SeedTab:CreateDropdown({
+Name = "Choose Seed",
 Options = seedList,
-CurrentOption = {},
-MultipleOptions = true,
-Callback = function(Value)
-selectedSeeds = Value
+CurrentOption = "",
+Flag = "ChooseSeed",
+Callback = function(option)
+if not table.find(selectedSeeds, option) then
+table.insert(selectedSeeds, option)
+Rayfield:Notify({
+Title = "Seed Added",
+Content = "Selected: "..option,
+Duration = 2
+})
+end
+end,
+})
+
+SeedTab:CreateButton({
+Name = "Clear Selected Seeds",
+Callback = function()
+selectedSeeds = {}
+Rayfield:Notify({
+Title = "Cleared",
+Content = "All selected seeds removed.",
+Duration = 2
+})
 end,
 })
 
 SeedTab:CreateToggle({
 Name = "Enable Auto Buy Seeds",
 CurrentValue = false,
-Flag = "AutoBuySeedFlag",
+Flag = "AutoBuySeeds",
 Callback = function(state)
 getgenv().AutoBuySeeds = state
 
@@ -133,6 +170,4 @@ end
 end,
 })
 
---------------------------------------------------------
--- END OF SCRIPT
 print("NameLess v1.3 Loaded | Credits: Mart Labaco")
