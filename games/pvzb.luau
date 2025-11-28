@@ -9,9 +9,6 @@ Enabled = true,
 FolderName = "NamelesScriptConfigs",
 FileName = "GearBuyerConfig"
 },
-Discord = {
-Enabled = false
-},
 KeySystem = false
 })
 
@@ -31,9 +28,9 @@ Content = "Selected Gears: 0"
 })
 
 local GearDropdown = MainTab:CreateDropdown({
-Name = "Gears to Buy",
+Name = "Select Gears to Auto-Buy",
 Options = GearList,
-CurrentOption = {},
+CurrentOption = GearList,
 Flag = "GearDropdown",
 MultipleOptions = true,
 Callback = function(Option)
@@ -41,63 +38,52 @@ SelectedCountParagraph:Set("Selected Gears: " .. #Option .. " | " .. table.conca
 end
 })
 
-MainTab:CreateButton({
-Name = "Auto Buy Selected",
-Callback = function()
-local selected = GearDropdown.CurrentOption
-if #selected == 0 then
+local AutoBuyToggle = MainTab:CreateToggle({
+Name = "AUTO BUY",
+CurrentValue = false,
+Flag = "AutoBuyToggle",
+Callback = function(Value)
+if Value then
 Rayfield:Notify({
 Title = "NamelesScript",
-Content = "No gears selected!",
+Content = "AUTO BUY Activated",
 Duration = 4
 })
-return
-end
-
+spawn(function()
+while AutoBuyToggle.CurrentValue do
+local selected = GearDropdown.CurrentOption
+if #selected > 0 then
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BuyGearRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("BuyGear")
-
-local successCount = 0
 for _, gearName in ipairs(selected) do
+if not AutoBuyToggle.CurrentValue then break end
 local args = { gearName, true }
-local success, err = pcall(function()
+pcall(function()
 BuyGearRemote:FireServer(unpack(args))
 end)
-if success then
-successCount += 1
+task.wait(0.35)
 end
-task.wait(0.3)
 end
-
+task.wait(0.1)
+end
+end)
+else
 Rayfield:Notify({
 Title = "NamelesScript",
-Content = "Bought " .. successCount .. "/" .. #selected .. " gears!",
-Duration = 6
+Content = "AUTO BUY Deactivated",
+Duration = 4
 })
 end
-})
-
-MainTab:CreateButton({
-Name = "Select All",
-Callback = function()
-GearDropdown:Set(GearList)
-end
-})
-
-MainTab:CreateButton({
-Name = "Clear Selection",
-Callback = function()
-GearDropdown:Set({})
 end
 })
 
 MainTab:CreateParagraph({
-Title = "Made with 💜 by NamelesScript",
-Content = "Enjoy unlimited gears! Stay safe & have fun."
+Title = "Made with NamelesScript",
+Content = "Select gears then toggle AUTO BUY on"
 })
 
 Rayfield:Notify({
 Title = "NamelesScript",
-Content = "Gear Buyer v1.2 Loaded Successfully!",
-Duration = 6
+Content = "Gear Buyer v1.2 Loaded!",
+Duration = 5
 })
