@@ -1,13 +1,13 @@
 --// NameLess Project
 --// Credits: Mart Labaco
---// Version: v1.3 (UI Fixed)
+--// Version: v1.4 (UI Improved, Rayfield-Safe)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-Name = "NameLess - Auto Buyer v1.3",
-LoadingTitle = "NameLess",
-LoadingSubtitle = "By Mart Labaco",
+Name = "NameLess - Auto Buyer v1.4",
+LoadingTitle = "NameLess Framework",
+LoadingSubtitle = "Created by Mart Labaco",
 ConfigurationSaving = {
 Enabled = true,
 FolderName = "NameLessConfigs",
@@ -35,7 +35,8 @@ local gearList = {
 "Carrot Launcher"
 }
 
-local selectedGear = {} -- holds selected gear
+local selectedGear = {}
+local gearLoopRunning = false
 
 GearTab:CreateSection("Select Gear to Buy")
 
@@ -43,13 +44,14 @@ GearTab:CreateDropdown({
 Name = "Choose Gear",
 Options = gearList,
 CurrentOption = "",
-Flag = "ChooseGear",
+Flag = "GearChooseFlag",
 Callback = function(option)
 if not table.find(selectedGear, option) then
 table.insert(selectedGear, option)
+
 Rayfield:Notify({
-Title = "Gear Added",
-Content = "Selected: "..option,
+Title = "Gear Selected",
+Content = option.." added to auto-buy list",
 Duration = 2
 })
 end
@@ -57,12 +59,12 @@ end,
 })
 
 GearTab:CreateButton({
-Name = "Clear Selected Gear",
+Name = "Clear Gear List",
 Callback = function()
 selectedGear = {}
 Rayfield:Notify({
-Title = "Cleared",
-Content = "All selected gear removed.",
+Title = "List Cleared",
+Content = "All selected gear removed",
 Duration = 2
 })
 end,
@@ -71,15 +73,19 @@ end,
 GearTab:CreateToggle({
 Name = "Enable Auto Buy Gear",
 CurrentValue = false,
-Flag = "AutoBuyGear",
+Flag = "GearAutoFlag",
 Callback = function(state)
 getgenv().AutoBuyGear = state
+
+if state and not gearLoopRunning then
+gearLoopRunning = true
 
 while getgenv().AutoBuyGear do
 task.wait(0.5)
 
 for _, gear in ipairs(selectedGear) do
 local args = {gear, true}
+
 pcall(function()
 game:GetService("ReplicatedStorage")
 :WaitForChild("Remotes")
@@ -87,6 +93,9 @@ game:GetService("ReplicatedStorage")
 :FireServer(unpack(args))
 end)
 end
+end
+
+gearLoopRunning = false
 end
 end,
 })
@@ -115,6 +124,7 @@ local seedList = {
 }
 
 local selectedSeeds = {}
+local seedLoopRunning = false
 
 SeedTab:CreateSection("Select Seeds to Buy")
 
@@ -122,13 +132,13 @@ SeedTab:CreateDropdown({
 Name = "Choose Seed",
 Options = seedList,
 CurrentOption = "",
-Flag = "ChooseSeed",
 Callback = function(option)
 if not table.find(selectedSeeds, option) then
 table.insert(selectedSeeds, option)
+
 Rayfield:Notify({
-Title = "Seed Added",
-Content = "Selected: "..option,
+Title = "Seed Selected",
+Content = option.." added to auto-buy list",
 Duration = 2
 })
 end
@@ -136,12 +146,12 @@ end,
 })
 
 SeedTab:CreateButton({
-Name = "Clear Selected Seeds",
+Name = "Clear Seed List",
 Callback = function()
 selectedSeeds = {}
 Rayfield:Notify({
-Title = "Cleared",
-Content = "All selected seeds removed.",
+Title = "List Cleared",
+Content = "All selected seeds removed",
 Duration = 2
 })
 end,
@@ -150,15 +160,18 @@ end,
 SeedTab:CreateToggle({
 Name = "Enable Auto Buy Seeds",
 CurrentValue = false,
-Flag = "AutoBuySeeds",
 Callback = function(state)
 getgenv().AutoBuySeeds = state
+
+if state and not seedLoopRunning then
+seedLoopRunning = true
 
 while getgenv().AutoBuySeeds do
 task.wait(0.5)
 
 for _, seed in ipairs(selectedSeeds) do
 local args = {seed, true}
+
 pcall(function()
 game:GetService("ReplicatedStorage")
 :WaitForChild("Remotes")
@@ -167,7 +180,10 @@ game:GetService("ReplicatedStorage")
 end)
 end
 end
+
+seedLoopRunning = false
+end
 end,
 })
 
-print("NameLess v1.3 Loaded | Credits: Mart Labaco")
+print("NameLess v1.4 Loaded | Credits: Mart Labaco")
