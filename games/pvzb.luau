@@ -47,7 +47,7 @@ GearTab:CreateParagraph({Title = "Gear Auto Buyer", Content = "Select gears → 
 
 local SelectedGearParagraph = GearTab:CreateParagraph({
 Title = "Selected Gears",
-Content = "Selected Gears: All"
+Content = ""
 })
 
 local GearDropdown = GearTab:CreateDropdown({
@@ -57,25 +57,38 @@ CurrentOption = GearList,
 MultipleOptions = true,
 Flag = "GearDropdown",
 Callback = function(Option)
-SelectedGearParagraph:Set("Selected Gears: " .. #Option .. " | " .. ( #Option > 0 and table.concat(Option, ", ") or "None" ))
+SelectedGearParagraph:Set("Selected Gears: " .. #Option .. " | " .. (#Option > 0 and table.concat(Option, ", ") or "None"))
 end
 })
+
+GearDropdown.Callback(GearDropdown.CurrentOption)
 
 local AutoGearToggle = GearTab:CreateToggle({
 Name = "AUTO BUY GEARS",
 CurrentValue = false,
 Flag = "AutoGear",
 Callback = function(Value)
+local selected = GearDropdown.CurrentOption
 if Value then
+if #selected == 0 then
+AutoGearToggle:Set(false)
+Rayfield:Notify({
+Title = "NamelesScript",
+Content = "Select at least one gear first!",
+Duration = 5
+})
+return
+end
 spawn(function()
-while AutoGearToggle.CurrentValue do
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local BuyGear = Remotes:WaitForChild("BuyGear")
-for _, gear in ipairs(GearDropdown.CurrentOption) do
+while AutoGearToggle.CurrentValue do
+for _, gear in ipairs(selected) do
 if not AutoGearToggle.CurrentValue then break end
 pcall(function()
-BuyGear:FireServer(gear, true)
+local args = {gear, true}
+BuyGear:FireServer(unpack(args))
 end)
 task.wait(0.35)
 end
@@ -91,7 +104,7 @@ SeedTab:CreateParagraph({Title = "Seed Auto Buyer", Content = "Select seeds → 
 
 local SelectedSeedParagraph = SeedTab:CreateParagraph({
 Title = "Selected Seeds",
-Content = "Selected Seeds: 0"
+Content = ""
 })
 
 local SeedDropdown = SeedTab:CreateDropdown({
@@ -101,25 +114,38 @@ CurrentOption = {},
 MultipleOptions = true,
 Flag = "SeedDropdown",
 Callback = function(Option)
-SelectedSeedParagraph:Set("Selected Seeds: " .. #Option .. " | " .. ( #Option > 0 and table.concat(Option, ", ") or "None" ))
+SelectedSeedParagraph:Set("Selected Seeds: " .. #Option .. " | " .. (#Option > 0 and table.concat(Option, ", ") or "None"))
 end
 })
+
+SeedDropdown.Callback(SeedDropdown.CurrentOption)
 
 local AutoSeedToggle = SeedTab:CreateToggle({
 Name = "AUTO BUY SEEDS",
 CurrentValue = false,
 Flag = "AutoSeed",
 Callback = function(Value)
+local selected = SeedDropdown.CurrentOption
 if Value then
+if #selected == 0 then
+AutoSeedToggle:Set(false)
+Rayfield:Notify({
+Title = "NamelesScript",
+Content = "Select at least one seed first!",
+Duration = 5
+})
+return
+end
 spawn(function()
-while AutoSeedToggle.CurrentValue do
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Remotes = ReplicatedStorage:WaitForChild("Remotes")
 local BuyItem = Remotes:WaitForChild("BuyItem")
-for _, seed in ipairs(SeedDropdown.CurrentOption) do
+while AutoSeedToggle.CurrentValue do
+for _, seed in ipairs(selected) do
 if not AutoSeedToggle.CurrentValue then break end
 pcall(function()
-BuyItem:FireServer(seed, true)
+local args = {seed, true}
+BuyItem:FireServer(unpack(args))
 end)
 task.wait(0.35)
 end
