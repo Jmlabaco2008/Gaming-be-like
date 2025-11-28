@@ -1,7 +1,9 @@
+-- LOAD RAYFIELD
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+-- WINDOW
 local Window = Rayfield:CreateWindow({
-Name = "NamelesScript - Gear & Seed Buyer v1.3",
+Name = "NamelesScript - Gear & Seed Buyer v1.4",
 LoadingTitle = "NamelesScript",
 LoadingSubtitle = "by NamelesScript",
 ConfigurationSaving = {
@@ -14,6 +16,10 @@ KeySystem = false
 
 local GearTab = Window:CreateTab("Gears", 4483362458)
 local SeedTab = Window:CreateTab("Seeds", 6035059730)
+
+---------------------------------------------------------------------
+-- DATA
+---------------------------------------------------------------------
 
 local GearList = {
 "Water Bucket",
@@ -42,53 +48,58 @@ local SeedList = {
 "Cactus Seed"
 }
 
+-- MAKES DROPDOWN ALWAYS ACCURATE
+local SelectedGears = {}
+local SelectedSeeds = {}
+
+---------------------------------------------------------------------
 -- GEARS TAB
+---------------------------------------------------------------------
+
 GearTab:CreateParagraph({Title = "Gear Auto Buyer", Content = "Select gears → Toggle AUTO BUY"})
 
 local SelectedGearParagraph = GearTab:CreateParagraph({
 Title = "Selected Gears",
-Content = ""
+Content = "None"
 })
 
 local GearDropdown = GearTab:CreateDropdown({
 Name = "Select Gears",
 Options = GearList,
-CurrentOption = GearList,
+CurrentOption = {},
 MultipleOptions = true,
 Flag = "GearDropdown",
-Callback = function(Option)
-SelectedGearParagraph:Set("Selected Gears: " .. #Option .. " | " .. (#Option > 0 and table.concat(Option, ", ") or "None"))
+Callback = function(option)
+SelectedGears = option
+SelectedGearParagraph:Set("Selected Gears: " .. (#SelectedGears > 0 and table.concat(SelectedGears, ", ") or "None"))
 end
 })
-
-GearDropdown.Callback(GearDropdown.CurrentOption)
 
 local AutoGearToggle = GearTab:CreateToggle({
 Name = "AUTO BUY GEARS",
 CurrentValue = false,
 Flag = "AutoGear",
-Callback = function(Value)
-local selected = GearDropdown.CurrentOption
-if Value then
-if #selected == 0 then
+Callback = function(state)
+if state then
+if #SelectedGears == 0 then
 AutoGearToggle:Set(false)
 Rayfield:Notify({
 Title = "NamelesScript",
 Content = "Select at least one gear first!",
-Duration = 5
+Duration = 4
 })
 return
 end
-spawn(function()
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+task.spawn(function()
+local Remotes = game:GetService("ReplicatedStorage").Remotes
 local BuyGear = Remotes:WaitForChild("BuyGear")
+
 while AutoGearToggle.CurrentValue do
-for _, gear in ipairs(selected) do
+for _, gear in ipairs(SelectedGears) do
 if not AutoGearToggle.CurrentValue then break end
 pcall(function()
-local args = {gear, true}
-BuyGear:FireServer(unpack(args))
+BuyGear:FireServer(gear, true)
 end)
 task.wait(0.35)
 end
@@ -99,12 +110,15 @@ end
 end
 })
 
+---------------------------------------------------------------------
 -- SEEDS TAB
+---------------------------------------------------------------------
+
 SeedTab:CreateParagraph({Title = "Seed Auto Buyer", Content = "Select seeds → Toggle AUTO BUY"})
 
 local SelectedSeedParagraph = SeedTab:CreateParagraph({
 Title = "Selected Seeds",
-Content = ""
+Content = "None"
 })
 
 local SeedDropdown = SeedTab:CreateDropdown({
@@ -113,39 +127,37 @@ Options = SeedList,
 CurrentOption = {},
 MultipleOptions = true,
 Flag = "SeedDropdown",
-Callback = function(Option)
-SelectedSeedParagraph:Set("Selected Seeds: " .. #Option .. " | " .. (#Option > 0 and table.concat(Option, ", ") or "None"))
+Callback = function(option)
+SelectedSeeds = option
+SelectedSeedParagraph:Set("Selected Seeds: " .. (#SelectedSeeds > 0 and table.concat(SelectedSeeds, ", ") or "None"))
 end
 })
-
-SeedDropdown.Callback(SeedDropdown.CurrentOption)
 
 local AutoSeedToggle = SeedTab:CreateToggle({
 Name = "AUTO BUY SEEDS",
 CurrentValue = false,
 Flag = "AutoSeed",
-Callback = function(Value)
-local selected = SeedDropdown.CurrentOption
-if Value then
-if #selected == 0 then
+Callback = function(state)
+if state then
+if #SelectedSeeds == 0 then
 AutoSeedToggle:Set(false)
 Rayfield:Notify({
 Title = "NamelesScript",
 Content = "Select at least one seed first!",
-Duration = 5
+Duration = 4
 })
 return
 end
-spawn(function()
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+
+task.spawn(function()
+local Remotes = game:GetService("ReplicatedStorage").Remotes
 local BuyItem = Remotes:WaitForChild("BuyItem")
+
 while AutoSeedToggle.CurrentValue do
-for _, seed in ipairs(selected) do
+for _, seed in ipairs(SelectedSeeds) do
 if not AutoSeedToggle.CurrentValue then break end
 pcall(function()
-local args = {seed, true}
-BuyItem:FireServer(unpack(args))
+BuyItem:FireServer(seed, true)
 end)
 task.wait(0.35)
 end
@@ -156,12 +168,15 @@ end
 end
 })
 
+---------------------------------------------------------------------
 -- FOOTER
-GearTab:CreateParagraph({Title = "NamelesScript v1.3", Content = "Clean • Fast • Undetected"})
-SeedTab:CreateParagraph({Title = "NamelesScript v1.3", Content = "Clean • Fast • Undetected"})
+---------------------------------------------------------------------
+
+GearTab:CreateParagraph({Title = "NamelesScript v1.4", Content = "Clean • Fast • Undetected"})
+SeedTab:CreateParagraph({Title = "NamelesScript v1.4", Content = "Clean • Fast • Undetected"})
 
 Rayfield:Notify({
 Title = "NamelesScript",
-Content = "Gear & Seed Buyer v1.3 Loaded!",
+Content = "Gear & Seed Buyer v1.4 Loaded Successfully!",
 Duration = 5
 })
