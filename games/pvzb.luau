@@ -45,13 +45,20 @@ local SeedList = {
 -- GEARS TAB
 GearTab:CreateParagraph({Title = "Gear Auto Buyer", Content = "Select gears → Toggle AUTO BUY"})
 
+local SelectedGearParagraph = GearTab:CreateParagraph({
+Title = "Selected Gears",
+Content = "Selected Gears: All"
+})
+
 local GearDropdown = GearTab:CreateDropdown({
 Name = "Select Gears",
 Options = GearList,
 CurrentOption = GearList,
 MultipleOptions = true,
 Flag = "GearDropdown",
-Callback = function() end
+Callback = function(Option)
+SelectedGearParagraph:Set("Selected Gears: " .. #Option .. " | " .. ( #Option > 0 and table.concat(Option, ", ") or "None" ))
+end
 })
 
 local AutoGearToggle = GearTab:CreateToggle({
@@ -62,10 +69,13 @@ Callback = function(Value)
 if Value then
 spawn(function()
 while AutoGearToggle.CurrentValue do
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local BuyGear = Remotes:WaitForChild("BuyGear")
 for _, gear in ipairs(GearDropdown.CurrentOption) do
 if not AutoGearToggle.CurrentValue then break end
 pcall(function()
-game:GetService("ReplicatedStorage").Remotes.BuyGear:FireServer(gear, true)
+BuyGear:FireServer(gear, true)
 end)
 task.wait(0.35)
 end
@@ -79,13 +89,20 @@ end
 -- SEEDS TAB
 SeedTab:CreateParagraph({Title = "Seed Auto Buyer", Content = "Select seeds → Toggle AUTO BUY"})
 
+local SelectedSeedParagraph = SeedTab:CreateParagraph({
+Title = "Selected Seeds",
+Content = "Selected Seeds: 0"
+})
+
 local SeedDropdown = SeedTab:CreateDropdown({
 Name = "Select Seeds",
 Options = SeedList,
 CurrentOption = {},
 MultipleOptions = true,
 Flag = "SeedDropdown",
-Callback = function() end
+Callback = function(Option)
+SelectedSeedParagraph:Set("Selected Seeds: " .. #Option .. " | " .. ( #Option > 0 and table.concat(Option, ", ") or "None" ))
+end
 })
 
 local AutoSeedToggle = SeedTab:CreateToggle({
@@ -96,10 +113,13 @@ Callback = function(Value)
 if Value then
 spawn(function()
 while AutoSeedToggle.CurrentValue do
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local BuyItem = Remotes:WaitForChild("BuyItem")
 for _, seed in ipairs(SeedDropdown.CurrentOption) do
 if not AutoSeedToggle.CurrentValue then break end
 pcall(function()
-game:GetService("ReplicatedStorage").Remotes.BuyItem:FireServer(seed, true)
+BuyItem:FireServer(seed, true)
 end)
 task.wait(0.35)
 end
