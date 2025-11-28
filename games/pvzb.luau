@@ -1,126 +1,103 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Mart Labaco Team - Gear Buyer v1.1",
-    LoadingTitle = "Mart Labaco Gear Buyer",
-    LoadingSubtitle = "by Mart Labaco Team",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "MartLabacoConfigs",
-        FileName = "GearBuyerConfig"
-    },
-    Discord = {
-        Enabled = false
-    },
-    KeySystem = false
+Name = "NamelesScript - Gear Buyer v1.2",
+LoadingTitle = "NamelesScript Gear Buyer",
+LoadingSubtitle = "by NamelesScript",
+ConfigurationSaving = {
+Enabled = true,
+FolderName = "NamelesScriptConfigs",
+FileName = "GearBuyerConfig"
+},
+Discord = {
+Enabled = false
+},
+KeySystem = false
 })
 
 local MainTab = Window:CreateTab("Gear Buyer", 4483362458)
 
 local GearList = {
-    "Water Bucket",
-    "Frost Grenade",
-    "Banana Gun",
-    "Frost Blower",
-    "Carrot Launcher"
+"Water Bucket",
+"Frost Grenade",
+"Banana Gun",
+"Frost Blower",
+"Carrot Launcher"
 }
 
-local SelectedGears = {}
+local SelectedCountParagraph = MainTab:CreateParagraph({
+Title = "Selected Gears",
+Content = "Selected Gears: 0"
+})
 
-for _, gearName in ipairs(GearList) do
-    MainTab:CreateToggle({
-        Name = gearName,
-        CurrentValue = false,
-        Flag = "Toggle_" .. gearName,
-        Callback = function(Value)
-            if Value then
-                table.insert(SelectedGears, gearName)
-            else
-                for i, v in ipairs(SelectedGears) do
-                    if v == gearName then
-                        table.remove(SelectedGears, i)
-                        break
-                    end
-                end
-            end
-            SelectedCountParagraph:Set("Selected Gears: " .. #SelectedGears .. " | " .. table.concat(SelectedGears, ", "))
-        end
-    })
+local GearDropdown = MainTab:CreateDropdown({
+Name = "Gears to Buy",
+Options = GearList,
+CurrentOption = {},
+Flag = "GearDropdown",
+MultipleOptions = true,
+Callback = function(Option)
+SelectedCountParagraph:Set("Selected Gears: " .. #Option .. " | " .. table.concat(Option, ", "))
+end
+})
+
+MainTab:CreateButton({
+Name = "Auto Buy Selected",
+Callback = function()
+local selected = GearDropdown.CurrentOption
+if #selected == 0 then
+Rayfield:Notify({
+Title = "NamelesScript",
+Content = "No gears selected!",
+Duration = 4
+})
+return
 end
 
-local SelectedCountParagraph = MainTab:CreateParagraph({
-    Title = "Selected Gears",
-    Content = "Selected Gears: 0"
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local BuyGearRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("BuyGear")
+
+local successCount = 0
+for _, gearName in ipairs(selected) do
+local args = { gearName, true }
+local success, err = pcall(function()
+BuyGearRemote:FireServer(unpack(args))
+end)
+if success then
+successCount += 1
+end
+task.wait(0.3)
+end
+
+Rayfield:Notify({
+Title = "NamelesScript",
+Content = "Bought " .. successCount .. "/" .. #selected .. " gears!",
+Duration = 6
+})
+end
 })
 
 MainTab:CreateButton({
-    Name = "Buy All Selected Gears",
-    Callback = function()
-        if #SelectedGears == 0 then
-            Rayfield:Notify({
-                Title = "Mart Labaco Team",
-                Content = "No gears selected!",
-                Duration = 4
-            })
-            return
-        end
-
-        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-        local BuyGearRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("BuyGear")
-
-        local successCount = 0
-        for _, gearName in ipairs(SelectedGears) do
-            local args = { gearName, true }
-            local success, err = pcall(function()
-                BuyGearRemote:FireServer(unpack(args))
-            end)
-            if success then
-                successCount += 1
-            else
-                warn("Failed to buy: " .. gearName .. " | Error: " .. tostring(err))
-            end
-            task.wait(0.3)
-        end
-
-        Rayfield:Notify({
-            Title = "Mart Labaco Team",
-            Content = "Successfully bought " .. successCount .. "/" .. #SelectedGears .. " selected gears!",
-            Duration = 6
-        })
-    end
+Name = "Select All",
+Callback = function()
+GearDropdown:Set(GearList)
+end
 })
 
 MainTab:CreateButton({
-    Name = "Select All Gears",
-    Callback = function()
-        for _, gearName in ipairs(GearList) do
-            if not table.find(SelectedGears, gearName) then
-                table.insert(SelectedGears, gearName)
-                Rayfield.Flags["Toggle_" .. gearName]:Set(true)
-            end
-        end
-        SelectedCountParagraph:Set("Selected Gears: " .. #SelectedGears .. " | All Selected")
-    end
-})
-
-MainTab:CreateButton({
-    Name = "Clear Selection",
-    Callback = function()
-        for _, gearName in ipairs(SelectedGears) do
-            Rayfield.Flags["Toggle_" .. gearName]:Set(false)
-        end
-        SelectedGears = {}
-        SelectedCountParagraph:Set("Selected Gears: 0")
-    end
+Name = "Clear Selection",
+Callback = function()
+GearDropdown:Set({})
+end
 })
 
 MainTab:CreateParagraph({
-    Title = "Made with 💜 by Mart Labaco Team",
-    Content = "Enjoy unlimited gears! Stay safe & have fun."
+Title = "Made with 💜 by NamelesScript",
+Content = "Enjoy unlimited gears! Stay safe & have fun."
 })
 
 Rayfield:Notify({
-    Title = "Mart Labaco Team",
-    Content = "Gear Buyer Loaded Successfully!",
-    Duration = 6
+Title = "NamelesScript",
+Content = "Gear Buyer v1.2 Loaded Successfully!",
+Duration = 6
 })
